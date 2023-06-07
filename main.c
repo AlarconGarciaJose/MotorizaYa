@@ -1321,10 +1321,11 @@ struct Region *buscarRegion(struct Region **regiones, int maxRegiones, int numRe
     return NULL;
 }
 
-int agregarRegion(struct Region ***regiones, int maxRegiones, struct Region **nueva){
+int agregarRegion(struct Region **regiones, int maxRegiones, struct Region *nueva){
     int i;
     for (i = 0; i < maxRegiones; i++){
-        if (*regiones[i] == NULL){
+        if (regiones[i] == NULL){
+            regiones[i] = (struct Region *)malloc(sizeof(struct Region));
             (regiones[i]) = nueva;
             return 1;
         }
@@ -1708,7 +1709,7 @@ void verOpcionesClientes(struct NodoCliente **head, int *totalClientes){
 
 
 
-void verRegiones(struct Region ***regiones, int *maxRegiones, int *totalActualRegiones, struct NodoProducto *raiz) {
+void verRegiones(struct Region **regiones, int *maxRegiones, int *totalActualRegiones, struct NodoProducto *raiz) {
     char desicion[2];
     int opcion;
     struct Region* buscado;
@@ -1721,12 +1722,13 @@ void verRegiones(struct Region ***regiones, int *maxRegiones, int *totalActualRe
                 printf("Ingrese el maximo de regiones:");
                 scanf("%d", maxRegiones);
                 (*totalActualRegiones) = 0;
-                *regiones = crearArrayRegiones((*maxRegiones));
+                regiones = crearArrayRegiones((*maxRegiones));
                 buscado = crearRegion(raiz);
-                totalActualRegiones += agregarRegion(regiones, *maxRegiones, &buscado);
+                totalActualRegiones += agregarRegion(regiones, *maxRegiones, buscado);
                 break;
             }
         }
+        return;
     }
     else {
         printf("Usted ha deseado trabajar con las regiones, ahora seleccione una opcion:\n");
@@ -1743,12 +1745,12 @@ void verRegiones(struct Region ***regiones, int *maxRegiones, int *totalActualRe
             switch (opcion) {
                 case 0: return;
                 case 1:
-                    mostrarRegiones(*regiones, *maxRegiones);
+                    mostrarRegiones(regiones, *maxRegiones);
                     break;
                 case 2:
                     printf("Ingrese el numero de la region que busca:");
                     scanf("%d", &numRegion);
-                    buscado = buscarRegion(*regiones, *maxRegiones, numRegion);
+                    buscado = buscarRegion(regiones, *maxRegiones, numRegion);
                     if (buscado) {
                         printf("Se encontro region, desea modificarla? SI/NO");
                         scanf("%2s", desicion);
@@ -1769,7 +1771,7 @@ void verRegiones(struct Region ***regiones, int *maxRegiones, int *totalActualRe
                 case 3:
                     if (*totalActualRegiones < *maxRegiones) {
                         buscado = crearRegion(raiz);
-                        totalActualRegiones += agregarRegion(regiones, *maxRegiones, &buscado);
+                        totalActualRegiones += agregarRegion(regiones, *maxRegiones, buscado);
                     }
                     else {
                         printf("Lo sentimos, no tenemos espacio para agregar la region que desea\n");
@@ -1778,12 +1780,12 @@ void verRegiones(struct Region ***regiones, int *maxRegiones, int *totalActualRe
                 case 4:
                     printf("Por favor, escriba el numero de la region que desea eliminar:");
                     scanf("%d", &numRegion);
-                    (*totalActualRegiones) -= eliminarRegion(*regiones, *maxRegiones, numRegion);
+                    (*totalActualRegiones) -= eliminarRegion(regiones, *maxRegiones, numRegion);
                 case 5:
-                    buscado = calcularRegionMenorGanancia(*regiones, *maxRegiones);
+                    buscado = calcularRegionMenorGanancia(regiones, *maxRegiones);
                     printf("La region con menor ganancias es la numero %d\n", (buscado) -> numRegion);
                 case 6:
-                    buscado = calcularRegionMayorGanancia(*regiones, *maxRegiones);
+                    buscado = calcularRegionMayorGanancia(regiones, *maxRegiones);
                     printf("La region que presento la mayor ganancia es la numero %d\n", buscado -> numRegion);
                     break;
                 default:
@@ -2047,7 +2049,7 @@ void menuPrincipal(struct Derco **empresa){
                             printf("No existe un catalogo de productos, por favor seleccione la opcion 1 antes de continua.\n\n");
                         }
                         else{
-                            verRegiones(&(*empresa) -> region, &(*empresa) -> maxRegionesOperacion, &(*empresa) -> regionesOperandoActualmente, (*empresa) ->raizProductos);
+                            verRegiones(((*empresa) -> region), &((*empresa) -> maxRegionesOperacion), &((*empresa) -> regionesOperandoActualmente), (*empresa) ->raizProductos);
                         }
                         break;
                     case 3:
